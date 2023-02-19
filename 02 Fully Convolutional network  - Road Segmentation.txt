@@ -1,0 +1,244 @@
+a) Objective: 
+
+
+	
+	a.1) Road Images Segmentation
+		What is segmentation of images? 
+		pixels grouped together based on properties : ex color, texture,intensity, visual features
+		
+
+	How? Deep learning technique : Fully convolutional network
+	What is FCN? neural network for Segmentation task
+
+	CNN : Image classification --> Output  : represents features extracted fom image  (ex boxes in object detection, prob distribution over different classes etc)
+	FCN  :Image segmentation --> Output : pixelwise segmentation mask(tensor) //divide image into pixels, label each pixel with class
+		//end of CNN -> replaced with convolutional layers, //why? network can take input of any size, output: segmentation mask
+		
+	//What is tensor? how final output is tensor?  each element in tensor = predicted class label for pixel	
+	//How FCN work? upsampling
+						
+	
+
+
+	a.2) 2d object detection on traffic scenario. How? YOLO
+
+
+	a.3) track object detections. How? Deep sort
+
+
+	a.4) 3d visualization: what to visualize?  camera image and lidar data. How?
+
+
+	a.5) Multi task learning :
+		Task 1 : Depth estimation
+		Task 2 : semantic segmentation
+
+
+	a.6) 3d object detection
+
+	a.7) bird's eye visualization. How? transformers technique
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Road Segmentation Problem statement
+
+
+a) 	Input Given: Image
+	Objective : Identify where are roads in this area	
+	Output: Mark the road
+	white = where road is
+	black  = other background
+
+
+b) What data set to use for Roads? KITTI road dataset
+
+
+c) How to achieve road segmentation? FCN
+
+	Old techniques: hardcode  values (Shadow will ruin parameter tuning)	//hand crafted technique
+	New FCN	  : Computer learns parameters from diverse data		//Deep learning technique
+
+	//In FCN directly outputs segmentation  //no pre or post processing required on image
+
+
+d) Apply
+Image --> FCN ---> 0011 image
+
+
+e) How FCN works? Upsampling
+
+	What is upsampling?
+		e.1) increase size of input
+		e.2) 2x2 image ---> (2x upsample) ----> 4x4 image
+		e.3) What values? in 4x4?
+			e.3.1) Decide using Bed of nails
+				top left  same value , rest 3 0s  , similarly for all ---> bad method , lots of 0s
+
+
+			e.3.2) Decide using Nearest neighbour method
+				//all nearest neighbours sam value (2x2 ---> 4x4)
+
+			e.3.3) Interpolation (Best worked)
+				//Check neighbour of 4x4 cell when placed on 2x2 
+				avg of near pixels in 2x2 == value of pixel in 4x4
+
+			e.3.4) transposed convolution (Best)	//all above techniques still hardcoded based on some heuristic
+				How assigned? Learnable weight filter
+
+				e.3.4.1) Define a filter of size
+				e.3.4.2) give random weight values
+				e.3.4.3) Use weight value to assign values to all cells in 4x4
+				e.3.4.4) Pass 4x4 to network
+				e.3.4.5) network will do back propogation, network will learn weights as well
+				
+
+
+
+f) FCN Architecture
+
+	f.1) Get a Image classification network VGG Net
+			//For image classification we have models that give great results on baseline datasets ex VGG Net
+
+			Image classification --> Output  : represents features extracted fom image  
+	f.2) Define classes that you think will be present, assign values
+		for ex 0 -> airplane, 1-> bicycle, 2 -> person
+	
+	f.3) pass image as Input through Image classification network
+		Output: 0,1,2
+
+	f.4) What changes needed in VGG net?
+		f.4.1) Good to know
+		f.4.1.1) What VGG Network contains?
+		Convolutional blocks , placed sequentially
+
+		f.4.1.2) What are convolutional blocks? 
+			1 block = 2 convolutional layers + max pooling layer
+			Convolutional layers: //applies filter to image  -> //filter detects patterns  -> //Output feature map highlight locations //-> feature map pass thru activation function (ReLU)
+			Pooling layers:	 //reduce dimensionality of feature maps. How? downsampling //What achieves? reduce overfitting //improve efficiency
+			
+			Normalization layers: //also can be added //what does? improve stability and speed of training
+
+			//Why convolutional block? extract features (meaningful) --> feature can be used for image classification, obejct orientation,semantic segmentation etc
+
+		
+		f.4.2) 
+		
+		f.4.2.1) Upsample 2X the last 3 convolutional blocks in VGG Net 
+		//last 3 convolutional blocks
+			Pool 3 -- Pool 4 -- Pool5
+
+		f.4.2.2) Use upsampled output and add to respective pool
+
+		//Do this 3 times
+
+		Final Output: Upsampled 8x Segmentation mask
+
+
+		//Why 8 times? FCN 8 architecture					//Used to identify even more finer structures
+		//in FCN 32 : only pool 5 is upsampled 32x				//Used to identify coarser structures in image
+		//in FCN 16 : only till pool 4 sum calculated --> upsample 16x 	//Used to identify finer structures			
+		
+
+
+	f.5) Implementing VGG
+		Where dataset? Kaggle
+		Where code? Kaggle
+		//Define input layer with parameter input shape
+		// 
+
+
+input_shape = (IMG_SIZE, IMG_SIZE, N_CHANNELS)
+
+# Generate a new model using the VGG network
+
+# Input
+
+inputs = Input(ifiput_shap:)
+
+# Define VGG network, pretrained on imagenet dataset
+
+vgglo_model = VGGlb(include_top = False, weights = 'imagenet', input_tensor = inputs)
+# Encoder Layers
+//extract 3 blocks: pool3,4,5
+
+cl = vggl6_model.get_layer("block3_pool").output
+
+c2 = vggl6_model.get_layer("block4_pool").output
+
+03 = vgg16_mode1.get_layer("block5_pool").output
+
+# Decoder
+//Upsample 2 times
+
+ul = UpSamplingZD((2, 2), interpolation = 'bilinear')(03)
+
+//Add upsampled layer to pool4
+dl = Add()([ul, 02])
+
+
+//Apply 1x1 convoluton	//What this convolution is for? placeholder to get dimension in right size	//can or cannot use : not much impact on performance
+dl = Conv20(256, 1, activation = 'sigmoid')(dl)
+
+
+//Apply 2nd upsampling
+u2 = UpSamplingZD((2, 2), interpolation = 'bilinear')(dl)
+
+//Add upsampled layer to pool3 layer
+d2 = Add()([u2, cl])
+
+//Apply 2D convolution //
+d2 = Conv2D(256, 1, activation = 'sigmoid')(d2)
+
+# Output
+//Calculate upsampling 8 times
+u3 = UpSamplingZD((8, 8), interpolation = 'bilinear')(d2)
+
+//Final convolution 
+//required //n_classes = 1 why? want output of network = single channel image
+//What single channel contains? 0 , 1  //1  = where road is  0 = background
+//apply sigmoid activation, why? get final values betweeen 0 and 1
+
+//return the model as input and output as subset
+outputs = Conv2D(N_CLASSES, 1, activation = 'sigmoid‘)(u3)
+
+
+//Return modell as input and output as a set , name of model = vgg_fcn8
+model = Mode1(inputS. OUtPUtS. name = "vgg_fcn8"			
+
+
+
+
+	f.6) What results?
+	Almost nearly detecting image correctly
+	
+	
+
+	f.7) Apply some changes
+	If concatenate() instead of add-->	What observed? Add() is little better
+	if Conv2DTranspose instead of Conv2D --> v bad output
+
+
+# Decoder	//instead of add, concatenate() , image just adds to the back --> no. of channels increased
+//Upsample 2 times
+
+ul = UpSamplingZD((2, 2), interpolation = 'bilinear')(03)
+
+//Add upsampled layer to pool4
+dl = Concatenate()([ul, 02])
+
+
+//Apply 1x1 convoluton	//What this convolution is for? placeholder to get dimension in right size	//can or cannot use : not much impact on performance
+dl = Conv2D(256, 1, activation = 'sigmoid')(dl)
+
+
+//Apply 2nd upsampling
+u2 = UpSamplingZD((2, 2), interpolation = 'bilinear')(dl)
+
+//Add upsampled layer to pool3 layer
+d2 = Concatenate()([u2, cl])
+
+//Apply 2D convolution //
+d2 = Conv2D(256, 1, activation = 'sigmoid')(d2)
+
+
+
+	f.7.2) Summary: What objective achieved? Road detected
+	What next? 2d object detection

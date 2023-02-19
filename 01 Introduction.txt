@@ -1,0 +1,31 @@
+Objective: Different projects related to perception module of self driving car
+
+
+Python
+CV using Deep learning
+Self Driving cars
+
+
+What we will learn:
+
+Deep SORT Algoorithm:
+
+
+1) YOLOv3 Network //bounding boxes
+
+2) Detections		//detection of object //encode cropped image
+
+3) Kalman Filter	//Generate predictions
+
+4) IoU Matching	//linear assignment problem + Cascade matching
+
+5) Nearest Neighbour Matching	//Eucledian distance + cosine distance	//Similarity
+
+6) Tracking		//Combine all above modules --> final object //does complete tracking
+
+7) Object Tracking	//Run complete algo	//Pretrained network for deep appearence descriptor
+							//function object tracking ---> takes input: video path + output path
+
+
+Results
+												

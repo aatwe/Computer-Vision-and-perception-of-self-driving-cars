@@ -1,0 +1,29 @@
+7 projects completed
+
+
+
+a) Learnt about perception in self driving, different concepts applied
+
+
+b) 3 projects: 2d related
+
+c) 4 projects: 3d related
+
+
+Implement new research papers with new dataset
+
+
+What more to learn?
+
+a) localization in self driving cars
+
+
+b) Motion planning
+
+
+
+Other projects:
+
+Similarity learning
+image captioning
+generative modeling

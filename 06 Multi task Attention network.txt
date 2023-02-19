@@ -1,0 +1,157 @@
+Objective : Depth and semantic segmentation of images
+
+What problem?
+
+Derive single network for different CV tasks
+
+Datbase:Citiscape database : Street view images
+
+What general use for DB? depth estimation and semantic segmentation
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+a) Depth Estimation
+
+Objective: calculate depth of any object present in image
+
+
+	a.1) Truck in front of car. How will we calculate depth?
+		How will we represent depth? gradient color
+
+
+			//near = darker
+			//far    = lighter
+
+
+	a.2) How to calculate depth maps
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+b) Semantic Segmentation
+	What is semantic segmentation objective? cars and details : Yellow	
+							  trees and bg : red
+							
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+What objective of Multi task learning?
+
+
+a) derive network to solve different tasks
+
+
+	tasks:
+		How to detect object
+		How to classify object
+		How to segment object ? SEGNET network ()
+
+
+	problem: cant have different network for different tasks
+
+Solution: Multi task attention network :M10
+
+
+a.1) Give input
+a.2) calculate what shared features of image	
+	How to calculate shared feature? Any convolutional network --> SetNet
+a.3) n tasks --> n attention modules 
+	What attention modules do: take data from features --> augment it in a way to use for task
+	//attention = attention each module gives to its task
+
+
+
+
+b) Segmentation task:
+
+	all networks have this structure
+										//Encoder: Downsampling part
+	b.1) downsample image , derive features from that image
+		downsample --> reach bottleneck --> sample to same dimension as input image
+
+		//Output: features derived
+	b.2) Using features derived --> Output segmentation mask
+
+
+										//Upsampling part: Decoder
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+SEGNET
+	a) convolutional blocks
+		//What do they contain? convolutional layers + pooling layers
+
+	b) each block has attention submodules'
+
+
+	c) Upsampling Attention module: //get input from previous attention module
+						//take input from 1st layer of convolution block
+		merge both matrices --> convolute --> convolute --> elementwisemultiply(output x input) --> convolute --> Output
+		Output --> attention module 2
+
+	d) Downsampling Attention module//get input from previous attention module
+						//take input from 1st layer of convolution block
+		convolute --> merge both matrices --> convolute --> convolute --> elementwisemultiply(output x input) --> convolute --> Output
+		Output --> attention module 2
+
+	
+
+//this same attention module architecture is followed for different tasks
+			
+
+Objective Acheived: //Network Architecture of M10 network
+Additional feature of M10 : Dynamic weight averaging
+What is  Dynamic weight averaging?
+	for any multitask learning network:
+
+		calculate loss = weighted avg of loss for different tasks
+
+	//adjusting weights for loss is v imp for network
+	//why? converge and learn different tasks
+
+	//How weights determined? rate of change of gradient loss = 
+
+	//What is  rate of change of gradient loss?
+
+	If training 2 batches of images -> Input (@ time t) and Input (@ time t+1)
+			//loss(t+1) - loss (t) = rate of change of gradient loss
+
+	//How to calculate weight values? softmaxavg()  --> tells what weights to have for individual losses
+
+
+//What learnt ? 2 contributions of multitask attention network technique
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Code:
+
+a) Implement dataset loader class. (it is specific for cityscape dataset, is made using architecture we learnt)
+							can apply to different datasets
+
+b) Define utility functions
+	//What do they do? train the model
+	
+c) Confusion matrix & Depth error
+
+d) Multitasktrainer function //handles complete training of network
+
+e) class SegNet	//network is defined in this
+
+f) load the dataset --> train on dataset
+
+	//authors trained network on 200 epoch, learning rate 10^-4
+		we take 100, 10^-3
+
+
+What results?
+	1) Observe segmentaiton maps 
+ Compare original segmentation map and predicted segmentation map
+Overlay results on image
+
+	
+	2) observe depth maps
+	original vs predicted	
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+

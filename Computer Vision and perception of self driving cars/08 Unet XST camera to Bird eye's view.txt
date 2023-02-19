@@ -1,0 +1,131 @@
+How to get bird eye's view from images?
+
+
+Given: 4 directions images
+	BEV Image
+	BEV Occlusion Image	//separate class for occluded part of image
+	Homography Image		//use 4 image ---> convert to homography (BEV Image)	//technique not used directly
+
+
+What is already done on these images?
+	classes semantically segmented
+
+Objective:	derive bev image for same
+
+UNetXST
+
+a) Unet Architecture
+
+	What use of network? Semantic Segmentation
+	What is Semantic Segmentation? Segment a region of interest froma  given image
+	 	Ex Segment cars,road
+	How is it different from other architecture? It is actually similar to other Semantic segmentation architectures
+		Encoder part (Downsamples) --> Output: visual features in image
+		Decoder part (Upsamples    ) --> Output: image
+		//Decoder also uses info from Encoder part.How? skip connections
+
+	What application of UNet? Biomedical Image segmentation, Self driving cars  
+
+b) Unet Architecture Extension (XSt)
+
+	b.1) What we will use in extension? Spatial transformers
+
+//Learn Homography
+	b.2) What is homography?
+	if object given, take image from camera at point x
+		move camera to point y take image again
+	
+	The transformation = homography = matrix multiplication
+
+	objective: find homography matrix : converts 1 image plane to other	
+	//we can use it to find how object will look in 3rd plane 	//without taking picture
+	//pixel mapping needs to be done
+	//we use inverse homography  (Output to input mapping)
+
+//using weighted average final pixel is calculated	//Bilinear Interpolation		//Alternative: linear interpolation,nearest neighbours
+//weighted avg wr to distance from surrounding pixels			
+
+	b.3) how we using homography in spatial transformer?	
+
+		What is spatial transformer? extension module, can be applied to any CNN
+		What it does? enables CNN to learn spatial properties in dataset
+			spatial transformer learns what?	parameters of homography metrics
+			learns why? to aid convolution network
+
+		Using learning : spatial transformers present image in different pov //helps cnn classify object accurately
+
+
+	b.4) How to apply to UXST?
+
+		we use fixed homography matrix
+		find homography from right camera --> virtual top camera
+		
+
+	why use UnitXST when can use homography?
+		Top view homography / inverse perspective mapping ---> assumes world around camera = flat
+		just using inverse perspective mapping //not accurate
+		hence need UnitXST
+	
+----''We have discussed components of UnitXST , time to apply"----
+
+
+	b.5) How to apply UnitXST
+
+
+	1) 4 inputs, 4 images
+
+	    1.1) each image,gets similar encoder network
+		What architecture for encoder? similar to old.  1 pipeline
+
+	    1.2) skip connections make use of spatial transformers
+
+	    1.3) 4 feature maps at different levels
+			How combined? spatial transformer
+
+
+	image 1 ---> spatial transformer --> features combined --> fed to skip connection
+
+	image 2 ---> ...
+
+
+
+	b.6) What implemented?
+
+	1) Utility Functions
+
+		load image
+		one hot conversion of input image
+			//What is one hot encoding?  Semantic semgented input image(RGB image) ---> 3d matrix (sparse representation of different classes)
+															//helps ML model learn and understand data
+	changes applied to parameters? why?kaggle constraints obey
+
+		image shape : reduced 	//to output faster learning curve
+		batch_size     : increased
+		epochs : 40	//instead of 400
+			
+	2) Data loader functions
+		What do they do? load data for ML model
+		
+	3) Define Network Architecture
+		Define spatial transformer
+		implement UNET (with spatial transformer extension)
+		
+
+	4) Train the network
+		
+
+Final Output:
+
+a) Images from 4 cameras
+
+
+model predicted bird's eye view image
+//slight noise, but model learnt to represent bird's eye view image
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+c) 
+	
+	

@@ -1,0 +1,133 @@
+Objective: 2D Object detection
+
+Company: Lyft : 3d object detection & Motion prediction competition
+Database --> Self driving car 
+
+What data? Camera data + LIDAR Sensor data
+
+
+
+Camera data: 2 cars behind, 2 cars ahead
+
+
+Lidar data : car is at x
+
+	
+What we will work on? Camera images
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+a) 2D Object detection	//Our task
+
+Problem statement: where is object+ what is object
+
+
+ 
+
+b) 3D Object detection
+
+Image + Lidar data --> where 3d object is? return 3d box of object + what it is
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+How to 2D object detection? Algorithm
+
+Problem statement: where is object+ what is object
+
+Which Algo for 2d images? YOLO : You only look once
+
+What is YOLO? Deep learning algorithm
+What input? image
+What output? object detected
+a)How YOLO works?
+
+a) Anchor boxes
+
+b) Intersection Over Union
+
+c) Bounding box prediction
+
+
+
+Input image --->   CNN Network   ---> Output Matrix (19x19)
+
+Given matrix (19x19) + vector = [Pc x y  w  h c1 c2 c3]
+
+//What is this vector? What info in a particular cell of Output 19x19 matrix
+
+Pc = if something interesting present/not
+if Pc =0 (not intersting)---> other values : x,y,w,h,c1,c2 --> not defined
+if Pc =1 (interesting present) --> x,y= centre of box found (object) //wr to given cell
+					W = width
+					H  = height
+					c1,c2,c3 : describe what object in cell
+
+
+//in below output cell x represents something interesting is present
+
+_______________
+_|__|__|__|__|__|
+_|__|__|__|_x|__|
+_|__|x_|__|__|__|
+_|__|__|x_|__|__|
+_|__|__|__|__|__|
+
+
+
+
+a.1) Bounding box will be generated
+a.2) label will be generated
+a.3) probability of box being correct	//accuracy  //there can be multiple bounding boxes each with different probability
+		
+
+
+
+
+b) Objective convert multiple bounding box into 1?  Intersection over union(IOU)?
+	//Non Maximum suppression
+
+What is IOU?
+
+
+
+
+consider inside bounding box = highest probability
+calculate IOU score for other boxes wr to this. How?
+b.1) calculate intersection
+b.2) divide intersection by their union
+b.3) What output?  IOU score		//High IOU = high prob, low IOU = low prob
+
+case1 : single cell high IOU
+
+case2 : single cell low IOU
+
+b.4) for case 3
+case3: single cell represents 2 objects	//Solution: Anchor boxes
+
+//extend vector 3 times on cell
+//why? 3 anchor boxes in that cell
+
+
+
+What is anchor box? rough shape for different objects in 1 cell
+How anchor box works? algo
+Different type of anchor boxes?
+	Square
+	Rectangle (V)
+	Rectange (H)
+What anchor box will do? predict certain specific object
+
+
+//////////////////////////////////////////////////////////////
+What features of YOLO? fast and accurate object detection technique
+
+
+Variants of YOLO: YOLOV3, YOLOV5, YOLOX
+//each variant: speed and accuracy improvement
+
+
+
+	
+
+
+
